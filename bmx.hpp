@@ -1,15 +1,23 @@
 ﻿/** 
- * Block Mixtrue Language
- * 
- * @file bmx.h
- * @author AnpyD (AD Luo) (leidish@foxmail.com)
- * @brief A block-type language 
- * @version 0.1
- * @date 2022-08-24
- * 
- * @copyright Copyright (c) 2022 AnpyD
- * 
- */
+*                    ___           ___     
+*     _____         /__/\         /__/|    
+*    /  /::\       |  |::\       |  |:|    
+*   /  /:/\:\      |  |:|:\      |  |:|    
+*  /  /:/~/::\   __|__|:|\:\   __|__|:|    
+* /__/:/ /:/\:| /__/::::| \:\ /__/::::\____
+* \  \:\/:/~/:/ \  \:\~~\__\/    ~\~~\::::/
+*  \  \::/ /:/   \  \:\           |~~|:|~~ 
+*   \  \:\/:/     \  \:\          |  |:|   
+*    \  \::/       \  \:\         |  |:|   
+*     \__\/         \__\/         |__|/    
+* 
+* Block Mixture Language for Modern C++
+* - Project: https://github.com/AnpyDX/Bmx
+* - Version: 1.0 (for C++)
+* 
+* @copyright Copyright (c) 2022 AnpyD
+* Distributed under MIT license, or public domain if desired and recognized in your jurisdiction.
+*/
 
 #pragma once
 #include <iostream>
@@ -18,7 +26,6 @@
 #include <string>
 #include <vector>
 #include <map>
-
 
 
 /* Internal Members */
