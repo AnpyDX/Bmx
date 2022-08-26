@@ -5,11 +5,11 @@
 This library is a **Bmx** parser for C++, but you can do some work to bind with other programming languages.
 
 ## How to use
-**Bmx** file can be formed with three structures: *Commit*, *BlockHeads*, *BlockBodys*.
+**Bmx** file can be formed with three structures: *Comments*, *BlockHeads*, *BlockBodys*.
 - sample.bmx
 ```ini
 """
-This is a commit   
+This is a comment   
 """
 
 [ Block1 ]
