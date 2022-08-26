@@ -88,6 +88,8 @@ namespace Bmx
     /// Bmx Type
     class Type
     {
+        friend std::string dumps(Type& type);
+
         public:
             std::string& operator[](const std::string& key)
             {
@@ -157,10 +159,10 @@ namespace Bmx
             std::vector<std::string> _values;
     };
 
-    /// load Bmx string
+    /// Load Bmx string
     Type load(const std::string& str)
     {
-        Type _BmxData;
+        Type _data;
 
         auto _lastI = str.begin();
         std::string _row = "";
@@ -202,7 +204,7 @@ namespace Bmx
                     // End recording block contain
                     if (_inBlock)
                     {
-                        _BmxData.update(_blockName, _blockContain);
+                        _data.update(_blockName, _blockContain);
                         _blockName = "";
                         _blockContain = "";
                         _inBlock = false;
@@ -266,7 +268,7 @@ namespace Bmx
                         _blockName = _row.substr(_nameBegin - _row.begin(), _nameEnd - _row.begin() - (_nameBegin - _row.begin()) + 1);
 
                         // Check block name has exisited
-                        if (_BmxData.has_block(_blockName))
+                        if (_data.has_block(_blockName))
                         {
                             Message(Error,"At (" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
                                 ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_nameBegin - _row.begin()) + 1) + "\n>> Block name \"" + _blockName + "\" has exisited!");
@@ -302,14 +304,14 @@ namespace Bmx
         if (_inBlock)
         {
             // Add the last block
-            _BmxData.update(_blockName, _blockContain);
+            _data.update(_blockName, _blockContain);
         }
 
-        return _BmxData;
+        return _data;
     }
 
 
-    /// load Bmx file
+    /// Load Bmx file
     Type loads(std::fstream& file)
     {
         Type _data;
@@ -442,5 +444,27 @@ namespace Bmx
         return _data;
     }
 
+
+    /// Convert the Bmx type to string for writing to a file
+    std::string dumps(Type& data)
+    {
+        std::string _str;
+
+        if (data.get_keys().size() != 0)
+        {
+            auto _keys = data.get_keys();
+            for (size_t i = 0; i < _keys.size(); i++)
+            {
+                _str.append("[ " + data._keys[i] + " ]\n" + data._values[i] + "\n");
+            }
+        }
+        else
+        {
+            // Error, there no block
+            Message(Error, "No block in Bmx type!");
+        }
+
+        return _str;
+    }
     
 }
