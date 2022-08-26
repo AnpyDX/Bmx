@@ -81,14 +81,14 @@ namespace
         }
     }
 
-    const std::string ErrorPoint(const std::string& row, int rowCount, int lineCount)
+    const std::string ErrorPoint(const std::string& row, uint32_t rowCount, uint32_t lineCount)
     {
         std::string codeLine;
         std::string underLine;
 
         codeLine = "|" + std::to_string(rowCount) + " |" + row + "\n";
 
-        for (int i = 0; i < (3 + (int)(rowCount)/10) + lineCount; i++)
+        for (uint32_t i = 0; i < (3 + (int)(rowCount)/10) + lineCount; i++)
         {
             underLine.append(" ");
         }
@@ -106,72 +106,44 @@ namespace Bmx
     class Type
     {
         public:
-            const std::string& operator[](const std::string& key) const
+            std::string& operator[](const std::string& key)
             {
-                // check key is exisit
-                if (has_block(key))
-                {
-                    return _values[std::find(_keys.begin(), _keys.end(), key) - _keys.begin()];
-                }
-                else
+                if (!has_block(key))
                 {
                     // Error, key is not exisited
                     Message(Error, "Block \"" + key + "\" is not exisited!");
                 }
+
+                return _values[std::find(_keys.begin(), _keys.end(), key) - _keys.begin()];
             }
 
             /**
             * Usage: add/change block
-            * Note: In order to avoid modifing original data accidently, calling this function will give you a warning.
-            *       If you do know what you are doing, set parameter "noWarning" to true to disable warning.
             */
-            void update(const std::string& key, const std::string& value, const bool noWarning = false)
+            void update(const std::string& key, const std::string& value)
             {
                 if (!has_block(key))
                 {
                     _keys.push_back(key);
                     _values.push_back(value);
-
-                    // Warning
-                    if (!noWarning)
-                    {
-                        Message(Warning, "You have add block \"" + key + "\" , this will cause the data to differ from the original file!");
-                    }
                 }
                 else
                 {
                     __int64 index = std::find(_keys.begin(), _keys.end(), key) - _keys.begin();
                     _values[index] = value;
-
-                    // Warning
-                    if (!noWarning)
-                    {
-                        Message(Warning, "You have change \"" + key + "\"'s data , this will cause the data to differ from the original file!");
-                    }
                 }
-
-                
             }
 
             /**
             * Usage: remove block
-            * Note: In order to avoid modifing original data accidently, calling this function will give you a warning.
-            *       If you do know what you are doing, set parameter "noWarning" to true to disable warning.
             */
-            void remove(const std::string& key, const bool noWarning = false)
+            void remove(const std::string& key)
             {
                 if (has_block(key))
                 {
                     __int64 index = std::find(_keys.begin(), _keys.end(), key) - _keys.begin();
                     _keys.erase(_keys.begin() + index);
                     _values.erase(_values.begin() + index);
-
-                    // Warning
-                    if (!noWarning)
-                    {
-                        Message(Warning, "You have deleted block \"" + key + "\" , this will cause the data to differ from the original file!");
-                    }
-
                 }
                 else
                 {
@@ -230,7 +202,7 @@ namespace Bmx
                 // End recording block contain
                 if (_inBlock)
                 {
-                    _data.update(_blockName, _blockContain, true);
+                    _data.update(_blockName, _blockContain);
                     _blockName = "";
                     _blockContain = "";
                     _inBlock = false;
@@ -280,14 +252,14 @@ namespace Bmx
                 if (!_foundRightBracket)
                 {
                     Message(Error, file + "(" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
-                        ErrorPoint(_row, _rowNum + 1, _row.length()), ">> Error! Block head's bracket was never closed!");
+                        ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_row.length())), ">> Error! Block head's bracket was never closed!");
                 }
                 // Error, the block head is empty
                 else if (_nameEnd == _row.rend().base())
                 {
                     
                     Message(Error, file + "(" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
-                        ErrorPoint(_row, _rowNum + 1, _row.length()), ">> Error! Block head is empty!");
+                        ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_row.length())), ">> Error! Block head is empty!");
                 }
                 // Right block head
                 else
@@ -298,7 +270,7 @@ namespace Bmx
                     if (_data.has_block(_blockName))
                     {
                         Message(Error, file + "(" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
-                            ErrorPoint(_row, _rowNum + 1, _nameBegin - _row.begin() + 1), ">> Error! Block name \"" + _blockName + "\" has exisited!");
+                            ErrorPoint(_row, _rowNum + 1,static_cast<uint32_t>( _nameBegin - _row.begin()) + 1), ">> Error! Block name \"" + _blockName + "\" has exisited!");
                     }
 
                     _inBlock = true;
@@ -331,7 +303,7 @@ namespace Bmx
         if (_inBlock)
         {
             // Add the last block
-            _data.update(_blockName, _blockContain, true);
+            _data.update(_blockName, _blockContain);
         }
 
         return _data;
