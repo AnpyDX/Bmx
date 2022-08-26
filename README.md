@@ -32,7 +32,7 @@ using namespace std;
 int main()
 {
     Bmx::Type data;
-    data = Bmx::read("sample.bmx");
+    data = Bmx::loads("sample.bmx");
 
     std::cout << data["Block1"] << std::endl;
     return 0;
