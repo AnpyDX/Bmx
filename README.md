@@ -15,6 +15,13 @@ This is an commit
 [ Block1 ]
 Here is BlockBody
 
+[ Block2 ]
+Hello World
+123456
+
+[ MyCode ]
+printf("Hello World!");
+
 ```
 - main.cpp
 ```c++
@@ -31,7 +38,7 @@ int main()
     return 0;
 }
 ```
-You can see more details in the [Document](https://github.com/AnpyDX/Bmx/Document.md)
+You can see more details in the [Document](https://github.com/AnpyDX/Bmx/blob/main/Document.md)
 
 ## License
 Licensed under the MIT license, see `LICENSE` for details.
