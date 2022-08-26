@@ -46,34 +46,16 @@ namespace
     enum MessageType {
         Warning, Error
     };
-
-    void Message(MessageType type, std::string file, std::string info)
-    {
-        if (type == Warning)
-        {
-            std::cerr << "[ Warning ] File " << file << std::endl << info << std::endl;
-        }
-        else if (type == Error)
-        {
-            std::cerr << "[ Error ] File " << file << std::endl << info << std::endl;
-            throw std::runtime_error(info);
-        }
-        else
-        {
-            // UNDIFINED TYPE, PASS
-        }
-    }
     
     void Message(MessageType type, std::string info)
     {
         if (type == Warning)
         {
-            std::cerr << "[ Warning ] " << info << std::endl;
+            throw std::runtime_error("[ Bmx ][ Warning ] " + info);
         }
         else if (type == Error)
         {
-            std::cerr << "[ Error ] " << info << std::endl;
-            throw std::runtime_error(info);
+            throw std::runtime_error("[ Bmx ][ Error ] " + info);
         }
         else
         {
@@ -103,6 +85,7 @@ namespace
 /* Public Members */
 namespace Bmx
 {
+    /// Bmx Type
     class Type
     {
         public:
@@ -174,15 +157,166 @@ namespace Bmx
             std::vector<std::string> _values;
     };
 
-    /// Read Bmx file
-    Type read(const std::string& file)
+    /// load Bmx string
+    Type load(const std::string& str)
+    {
+        Type _BmxData;
+
+        auto _lastI = str.begin();
+        std::string _row = "";
+        uint32_t _rowNum = 0;
+        bool _inBlock = false;
+        std::string _blockName = "";
+        std::string _blockContain = "";
+
+        for (auto i = str.begin(); i != str.end(); i++)
+        {
+            if (*i == '\n' || i == str.end() - 1)
+            {   
+                // GET ROW
+                _row = "";
+                if (i == str.end() - 1)
+                {
+                    for (auto _ri = _lastI; _ri != str.end(); _ri++)
+                    {
+                        _row.push_back(*_ri);
+                    }
+                }
+                else
+                {
+                    for (auto _ri = _lastI; _ri != i; _ri++)
+                    {
+                        _row.push_back(*_ri);
+                    }
+                }
+
+                _lastI = i + 1;
+
+                // READ ROW
+                
+                // -- Read block head. 
+                // Note: "[[" will be record as "["
+                if (std::string(1, _row[0]) == KeyWords[LEFT_BRACKET_KEY] &&
+                    std::string(1, _row[1]) != KeyWords[LEFT_BRACKET_KEY])
+                {
+                    // End recording block contain
+                    if (_inBlock)
+                    {
+                        _BmxData.update(_blockName, _blockContain);
+                        _blockName = "";
+                        _blockContain = "";
+                        _inBlock = false;
+                    }
+
+                    // Read block head
+                    std::string::iterator _nameBegin;
+                    std::string::iterator _nameEnd;
+                    bool _foundRightBracket = false;
+                    bool _foundRightBegin = false;
+
+                    // Left [
+                    for (auto _line = _row.begin() + 1; _line != _row.end(); _line++)
+                    {
+                        if (std::string(1, *_line) != " ")
+                        {
+                            _nameBegin = _line;
+                            break;
+                        }
+                    }
+
+                    // Right ]
+                    for (auto _line = _row.rbegin(); _line != _row.rend(); _line++)
+                    {
+                        if (std::string(1, *_line) == KeyWords[RIGHT_BRACKET_KEY])
+                        {
+                            _foundRightBracket = true;
+                            for (auto _inl = _line + 1; _inl != _row.rend(); _inl++)
+                            {
+                                if (std::string(1, *_inl) != " ")
+                                {
+                                    _nameEnd = _inl.base() - 1;
+                                    _foundRightBegin = true;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (_foundRightBegin)
+                        {
+                            break;
+                        }
+                    }
+
+                    // Error, the bracket was not closed
+                    if (!_foundRightBracket)
+                    {
+                        Message(Error,  "At (" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
+                            ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_row.length())) + "\n>> Block head's bracket was never closed!");
+                    }
+                    // Error, the block head is empty
+                    else if (_nameEnd == _row.rend().base())
+                    {
+
+                        Message(Error,  "At (" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
+                            ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_row.length())) + "\n>> Block head is empty!");
+                    }
+                    // Right block head
+                    else
+                    {
+                        _blockName = _row.substr(_nameBegin - _row.begin(), _nameEnd - _row.begin() - (_nameBegin - _row.begin()) + 1);
+
+                        // Check block name has exisited
+                        if (_BmxData.has_block(_blockName))
+                        {
+                            Message(Error,"At (" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
+                                ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_nameBegin - _row.begin()) + 1) + "\n>> Block name \"" + _blockName + "\" has exisited!");
+                        }
+
+                        _inBlock = true;
+                    }
+
+                }
+
+                // -- Read block contain
+                else
+                {
+                    // "[[" => "["
+                    if (_row != "" && std::string(1, _row[1]) == KeyWords[LEFT_BRACKET_KEY])
+                    {
+                        _blockContain.append(_row.substr(1, _row.length()) + "\n");
+                    }
+                    // If in block, record contain
+                    else
+                    {
+                        if (_inBlock)
+                        {
+                            _blockContain.append(_row + "\n");
+                        }
+                    }
+                }
+
+                _rowNum++;
+            }
+        }
+
+        if (_inBlock)
+        {
+            // Add the last block
+            _BmxData.update(_blockName, _blockContain);
+        }
+
+        return _BmxData;
+    }
+
+
+    /// load Bmx file
+    Type loads(std::fstream& file)
     {
         Type _data;
 
-        // Open file
-        std::ifstream _file(file);
-        if (!_file.is_open()) {
-            Message(Error, file, ">> Failed to open Bmx file!");
+        // Check file is opened
+        if (!file.is_open()) {
+            Message(Error, ">> Failed to open Bmx file!");
         }
 
         // Read file
@@ -192,7 +326,7 @@ namespace Bmx
         std::string _blockName = "";
         std::string _blockContain = "";
         
-        while (std::getline(_file, _row))
+        while (std::getline(file, _row))
         {
             // -- Read block head. 
             // Note: "[[" will be record as "["
@@ -251,15 +385,14 @@ namespace Bmx
                 // Error, the bracket was not closed
                 if (!_foundRightBracket)
                 {
-                    Message(Error, file + "(" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
-                        ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_row.length())), ">> Error! Block head's bracket was never closed!");
+                    Message(Error, "At file (" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
+                        ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_row.length())) + "\n>> Block head's bracket was never closed!");
                 }
                 // Error, the block head is empty
                 else if (_nameEnd == _row.rend().base())
-                {
-                    
-                    Message(Error, file + "(" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
-                        ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_row.length())), ">> Error! Block head is empty!");
+                { 
+                    Message(Error, "At file (" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
+                        ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_row.length())) + "\n>> Block head is empty!");
                 }
                 // Right block head
                 else
@@ -269,8 +402,8 @@ namespace Bmx
                     // Check block name has exisited
                     if (_data.has_block(_blockName))
                     {
-                        Message(Error, file + "(" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
-                            ErrorPoint(_row, _rowNum + 1,static_cast<uint32_t>( _nameBegin - _row.begin()) + 1), ">> Error! Block name \"" + _blockName + "\" has exisited!");
+                        Message(Error, "At file (" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
+                            ErrorPoint(_row, _rowNum + 1,static_cast<uint32_t>( _nameBegin - _row.begin()) + 1) + "\n>> Block name \"" + _blockName + "\" has exisited!");
                     }
 
                     _inBlock = true;
@@ -308,4 +441,6 @@ namespace Bmx
 
         return _data;
     }
+
+    
 }
