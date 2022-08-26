@@ -9,7 +9,7 @@ This library is a **Bmx** parser for C++, but you can do some work to bind with 
 - sample.bmx
 ```ini
 """
-This is an commit   
+This is a commit   
 """
 
 [ Block1 ]
