@@ -47,5 +47,8 @@ You can see more details in the [Document](https://github.com/AnpyDX/Bmx/blob/ma
 ## Document
 See [Document](https://github.com/AnpyDX/Bmx/blob/main/Document.md).
 
+## Thanks
+http://www.network-science.de/ascii/
+
 ## License
 Licensed under the MIT license, see `LICENSE` for details.
