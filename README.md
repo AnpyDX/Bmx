@@ -1,6 +1,6 @@
 # Bmx
 ## About
-**Block Mixture Language** is a lightweight data storage format. It provide you a easy way to store data or codes! For example, you can put the *vertex shader* and *fragment shader* at one `bmx` file, so that you can easily manage your code.
+**Block Mixture Language** is a lightweight data storage format. It provide you a easy way to store data or codes. For example, you can put the *vertex shader* and *fragment shader* at one `bmx` file, so that you can easily manage your code.
 
 This library is a `Bmx` parser for C++, but you can do some work to bind with other programming languages.
 
