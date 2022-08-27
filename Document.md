@@ -142,7 +142,7 @@ int main()
 
 ### Bmx::Type::has_block
 - Prototype: `bool Type::has_block(const std::string& key) const`
-- Usgae: Check is block exisited.
+- Usgae: Check whether the block exists.
 
 ### Bmx::Type::get_keys
 - Prototype: `std::vector<std::string> Type::get_keys() const`
