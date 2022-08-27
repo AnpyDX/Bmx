@@ -42,27 +42,7 @@ namespace
         {RIGHT_BRACKET_KEY, "]"}
     };
 
-    // BMX Reader Message
-    enum MessageType {
-        Warning, Error
-    };
-    
-    void Message(MessageType type, std::string info)
-    {
-        if (type == Warning)
-        {
-            throw std::runtime_error("[ Bmx ][ Warning ] " + info);
-        }
-        else if (type == Error)
-        {
-            throw std::runtime_error("[ Bmx ][ Error ] " + info);
-        }
-        else
-        {
-            // UNDEFINED TYPE, PASS
-        }
-    }
-
+    // Wrong Point Info
     const std::string ErrorPoint(const std::string& row, uint32_t rowCount, uint32_t lineCount)
     {
         std::string codeLine;
@@ -85,6 +65,26 @@ namespace
 /* Public Members */
 namespace Bmx
 {
+    // BMX Exception Type
+    class Exception : public std::exception
+    {
+    public:
+        Exception(const std::string& info)
+        {
+            this->mExceptionInfo = info;
+        }
+
+        virtual ~Exception() {}
+
+        virtual const char* what() const
+        {
+            return this->mExceptionInfo.c_str();
+        }
+
+    private:
+        std::string mExceptionInfo;
+    };
+
     /// Bmx Type
     class Type
     {
@@ -96,7 +96,7 @@ namespace Bmx
                 if (!has_block(key))
                 {
                     // Error, key is not exisited
-                    Message(Error, "Block \"" + key + "\" is not exisited!");
+                    throw Bmx::Exception("Block \"" + key + "\" is not exisited!");
                 }
 
                 return _values[std::find(_keys.begin(), _keys.end(), key) - _keys.begin()];
@@ -133,7 +133,7 @@ namespace Bmx
                 else
                 {
                     // Error, key is not exisited
-                    Message(Error, "Block \"" + key + "\" is not exisited!");
+                    throw Bmx::Exception("Block \"" + key + "\" is not exisited!");
                 }
             }
 
@@ -160,9 +160,9 @@ namespace Bmx
     };
 
     /// Load Bmx string
-    Type load(const std::string& str)
+    Bmx::Type load(const std::string& str)
     {
-        Type _data;
+        Bmx::Type _data;
 
         auto _lastI = str.begin();
         std::string _currentLine = "";
@@ -252,14 +252,14 @@ namespace Bmx
                     // Error, the bracket was not closed
                     if (!_foundRightBracket)
                     {
-                        Message(Error,  "At (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_currentLine.length()) + ")\n" +
+                        throw Bmx::Exception("At (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_currentLine.length()) + ")\n" +
                             ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_currentLine.length())) + "\n>> Block head's bracket was never closed!");
                     }
                     // Error, the block head is empty
                     else if (_nameEnd == _currentLine.rend().base())
                     {
 
-                        Message(Error,  "At (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_currentLine.length()) + ")\n" +
+                        throw Bmx::Exception("At (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_currentLine.length()) + ")\n" +
                             ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_currentLine.length())) + "\n>> Block head is empty!");
                     }
                     // Right block head
@@ -270,7 +270,7 @@ namespace Bmx
                         // Check block name has exisited
                         if (_data.has_block(_blockName))
                         {
-                            Message(Error,"At (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_nameBegin - _currentLine.begin() + 1) + ")\n" +
+                            throw Bmx::Exception("At (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_nameBegin - _currentLine.begin() + 1) + ")\n" +
                                 ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_nameBegin - _currentLine.begin()) + 1) + "\n>> Block name \"" + _blockName + "\" has exisited!");
                         }
 
@@ -312,13 +312,13 @@ namespace Bmx
 
 
     /// Load Bmx file
-    Type loads(std::fstream& file)
+    Bmx::Type loads(std::fstream& file)
     {
-        Type _data;
+        Bmx::Type _data;
 
         // Check file is opened
         if (!file.is_open()) {
-            Message(Error, ">> Failed to open Bmx file!");
+            throw Bmx::Exception(">> Failed to open Bmx file!");
         }
 
         // Read file
@@ -387,13 +387,13 @@ namespace Bmx
                 // Error, the bracket was not closed
                 if (!_foundRightBracket)
                 {
-                    Message(Error, "At file (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_currentLine.length()) + ")\n" +
+                    throw Bmx::Exception("At file (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_currentLine.length()) + ")\n" +
                         ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_currentLine.length())) + "\n>> Block head's bracket was never closed!");
                 }
                 // Error, the block head is empty
                 else if (_nameEnd == _currentLine.rend().base())
                 { 
-                    Message(Error, "At file (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_currentLine.length()) + ")\n" +
+                    throw Bmx::Exception("At file (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_currentLine.length()) + ")\n" +
                         ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_currentLine.length())) + "\n>> Block head is empty!");
                 }
                 // Right block head
@@ -404,7 +404,7 @@ namespace Bmx
                     // Check block name has exisited
                     if (_data.has_block(_blockName))
                     {
-                        Message(Error, "At file (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_nameBegin - _currentLine.begin() + 1) + ")\n" +
+                        throw Bmx::Exception("At file (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_nameBegin - _currentLine.begin() + 1) + ")\n" +
                             ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_nameBegin - _currentLine.begin()) + 1) + "\n>> Block name \"" + _blockName + "\" has exisited!");
                     }
 
@@ -446,7 +446,7 @@ namespace Bmx
 
 
     /// Convert the Bmx type to string for writing to a file
-    std::string dumps(Type& data)
+    std::string dumps(Bmx::Type& data)
     {
         std::string _str;
 
@@ -460,8 +460,8 @@ namespace Bmx
         }
         else
         {
-            // Error, there no block
-            Message(Error, "No block in Bmx type!");
+            // Error, there are no blocks in data
+            throw Bmx::Exception("No block in Bmx type!");
         }
 
         return _str;
