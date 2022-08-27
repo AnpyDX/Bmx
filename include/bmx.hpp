@@ -165,8 +165,8 @@ namespace Bmx
         Type _data;
 
         auto _lastI = str.begin();
-        std::string _row = "";
-        uint32_t _rowNum = 0;
+        std::string _currentLine = "";
+        uint32_t _lineNum = 0;
         bool _inBlock = false;
         std::string _blockName = "";
         std::string _blockContain = "";
@@ -175,20 +175,20 @@ namespace Bmx
         {
             if (*i == '\n' || i == str.end() - 1)
             {   
-                // GET ROW
-                _row = "";
+                // GET LINE
+                _currentLine = "";
                 if (i == str.end() - 1)
                 {
                     for (auto _ri = _lastI; _ri != str.end(); _ri++)
                     {
-                        _row.push_back(*_ri);
+                        _currentLine.push_back(*_ri);
                     }
                 }
                 else
                 {
                     for (auto _ri = _lastI; _ri != i; _ri++)
                     {
-                        _row.push_back(*_ri);
+                        _currentLine.push_back(*_ri);
                     }
                 }
 
@@ -198,8 +198,8 @@ namespace Bmx
                 
                 // -- Read block head. 
                 // Note: "[[" will be record as "["
-                if (std::string(1, _row[0]) == KeyWords[LEFT_BRACKET_KEY] &&
-                    std::string(1, _row[1]) != KeyWords[LEFT_BRACKET_KEY])
+                if (std::string(1, _currentLine[0]) == KeyWords[LEFT_BRACKET_KEY] &&
+                    std::string(1, _currentLine[1]) != KeyWords[LEFT_BRACKET_KEY])
                 {
                     // End recording block contain
                     if (_inBlock)
@@ -217,22 +217,22 @@ namespace Bmx
                     bool _foundRightBegin = false;
 
                     // Left [
-                    for (auto _line = _row.begin() + 1; _line != _row.end(); _line++)
+                    for (auto _column = _currentLine.begin() + 1; _column != _currentLine.end(); _column++)
                     {
-                        if (std::string(1, *_line) != " ")
+                        if (std::string(1, *_column) != " ")
                         {
-                            _nameBegin = _line;
+                            _nameBegin = _column;
                             break;
                         }
                     }
 
                     // Right ]
-                    for (auto _line = _row.rbegin(); _line != _row.rend(); _line++)
+                    for (auto _column = _currentLine.rbegin(); _column != _currentLine.rend(); _column++)
                     {
-                        if (std::string(1, *_line) == KeyWords[RIGHT_BRACKET_KEY])
+                        if (std::string(1, *_column) == KeyWords[RIGHT_BRACKET_KEY])
                         {
                             _foundRightBracket = true;
-                            for (auto _inl = _line + 1; _inl != _row.rend(); _inl++)
+                            for (auto _inl = _column + 1; _inl != _currentLine.rend(); _inl++)
                             {
                                 if (std::string(1, *_inl) != " ")
                                 {
@@ -252,26 +252,26 @@ namespace Bmx
                     // Error, the bracket was not closed
                     if (!_foundRightBracket)
                     {
-                        Message(Error,  "At (" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
-                            ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_row.length())) + "\n>> Block head's bracket was never closed!");
+                        Message(Error,  "At (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_currentLine.length()) + ")\n" +
+                            ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_currentLine.length())) + "\n>> Block head's bracket was never closed!");
                     }
                     // Error, the block head is empty
-                    else if (_nameEnd == _row.rend().base())
+                    else if (_nameEnd == _currentLine.rend().base())
                     {
 
-                        Message(Error,  "At (" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
-                            ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_row.length())) + "\n>> Block head is empty!");
+                        Message(Error,  "At (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_currentLine.length()) + ")\n" +
+                            ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_currentLine.length())) + "\n>> Block head is empty!");
                     }
                     // Right block head
                     else
                     {
-                        _blockName = _row.substr(_nameBegin - _row.begin(), _nameEnd - _row.begin() - (_nameBegin - _row.begin()) + 1);
+                        _blockName = _currentLine.substr(_nameBegin - _currentLine.begin(), _nameEnd - _currentLine.begin() - (_nameBegin - _currentLine.begin()) + 1);
 
                         // Check block name has exisited
                         if (_data.has_block(_blockName))
                         {
-                            Message(Error,"At (" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
-                                ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_nameBegin - _row.begin()) + 1) + "\n>> Block name \"" + _blockName + "\" has exisited!");
+                            Message(Error,"At (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_nameBegin - _currentLine.begin() + 1) + ")\n" +
+                                ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_nameBegin - _currentLine.begin()) + 1) + "\n>> Block name \"" + _blockName + "\" has exisited!");
                         }
 
                         _inBlock = true;
@@ -283,21 +283,21 @@ namespace Bmx
                 else
                 {
                     // "[[" => "["
-                    if (_row != "" && std::string(1, _row[1]) == KeyWords[LEFT_BRACKET_KEY])
+                    if (_currentLine != "" && std::string(1, _currentLine[1]) == KeyWords[LEFT_BRACKET_KEY])
                     {
-                        _blockContain.append(_row.substr(1, _row.length()) + "\n");
+                        _blockContain.append(_currentLine.substr(1, _currentLine.length()) + "\n");
                     }
                     // If in block, record contain
                     else
                     {
                         if (_inBlock)
                         {
-                            _blockContain.append(_row + "\n");
+                            _blockContain.append(_currentLine + "\n");
                         }
                     }
                 }
 
-                _rowNum++;
+                _lineNum++;
             }
         }
 
@@ -322,18 +322,18 @@ namespace Bmx
         }
 
         // Read file
-        uint32_t _rowNum = 0;
-        std::string _row;
+        uint32_t _lineNum = 0;
+        std::string _currentLine = "";
         bool _inBlock = false;
         std::string _blockName = "";
         std::string _blockContain = "";
         
-        while (std::getline(file, _row))
+        while (std::getline(file, _currentLine))
         {
             // -- Read block head. 
             // Note: "[[" will be record as "["
-            if (std::string(1, _row[0]) == KeyWords[LEFT_BRACKET_KEY] &&
-                std::string(1, _row[1]) != KeyWords[LEFT_BRACKET_KEY])
+            if (std::string(1, _currentLine[0]) == KeyWords[LEFT_BRACKET_KEY] &&
+                std::string(1, _currentLine[1]) != KeyWords[LEFT_BRACKET_KEY])
             {
                 // End recording block contain
                 if (_inBlock)
@@ -352,22 +352,22 @@ namespace Bmx
                 bool _foundRightBegin = false;
 
                 // Left [
-                for (auto _line = _row.begin() + 1; _line != _row.end(); _line++)
+                for (auto _column = _currentLine.begin() + 1; _column != _currentLine.end(); _column++)
                 {
-                    if (std::string(1, *_line) != " ")
+                    if (std::string(1, *_column) != " ")
                     {
-                        _nameBegin = _line;
+                        _nameBegin = _column;
                         break;
                     }
                 }
 
                 // Right ]
-                for (auto _line = _row.rbegin(); _line != _row.rend(); _line++)
+                for (auto _column = _currentLine.rbegin(); _column != _currentLine.rend(); _column++)
                 {
-                    if (std::string(1, *_line) == KeyWords[RIGHT_BRACKET_KEY])
+                    if (std::string(1, *_column) == KeyWords[RIGHT_BRACKET_KEY])
                     {
                         _foundRightBracket = true;
-                        for (auto _inl = _line + 1; _inl != _row.rend(); _inl++)
+                        for (auto _inl = _column + 1; _inl != _currentLine.rend(); _inl++)
                         {
                             if (std::string(1, *_inl) != " ")
                             {
@@ -387,25 +387,25 @@ namespace Bmx
                 // Error, the bracket was not closed
                 if (!_foundRightBracket)
                 {
-                    Message(Error, "At file (" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
-                        ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_row.length())) + "\n>> Block head's bracket was never closed!");
+                    Message(Error, "At file (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_currentLine.length()) + ")\n" +
+                        ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_currentLine.length())) + "\n>> Block head's bracket was never closed!");
                 }
                 // Error, the block head is empty
-                else if (_nameEnd == _row.rend().base())
+                else if (_nameEnd == _currentLine.rend().base())
                 { 
-                    Message(Error, "At file (" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
-                        ErrorPoint(_row, _rowNum + 1, static_cast<uint32_t>(_row.length())) + "\n>> Block head is empty!");
+                    Message(Error, "At file (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_currentLine.length()) + ")\n" +
+                        ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_currentLine.length())) + "\n>> Block head is empty!");
                 }
                 // Right block head
                 else
                 {
-                    _blockName = _row.substr(_nameBegin - _row.begin(), _nameEnd - _row.begin() - (_nameBegin - _row.begin()) + 1);
+                    _blockName = _currentLine.substr(_nameBegin - _currentLine.begin(), _nameEnd - _currentLine.begin() - (_nameBegin - _currentLine.begin()) + 1);
 
                     // Check block name has exisited
                     if (_data.has_block(_blockName))
                     {
-                        Message(Error, "At file (" + std::to_string(_rowNum + 1) + ", " + std::to_string(_row.length()) + ")\n" +
-                            ErrorPoint(_row, _rowNum + 1,static_cast<uint32_t>( _nameBegin - _row.begin()) + 1) + "\n>> Block name \"" + _blockName + "\" has exisited!");
+                        Message(Error, "At file (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_nameBegin - _currentLine.begin() + 1) + ")\n" +
+                            ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_nameBegin - _currentLine.begin()) + 1) + "\n>> Block name \"" + _blockName + "\" has exisited!");
                     }
 
                     _inBlock = true;
@@ -417,9 +417,9 @@ namespace Bmx
             else
             {
                 // "[[" => "["
-                if (_row != "" && std::string(1, _row[1]) == KeyWords[LEFT_BRACKET_KEY])
+                if (_currentLine != "" && std::string(1, _currentLine[1]) == KeyWords[LEFT_BRACKET_KEY])
                 {
-                    _blockContain.append(_row.substr(1, _row.length()) + "\n");
+                    _blockContain.append(_currentLine.substr(1, _currentLine.length()) + "\n");
                 }
                 // If in block, record contain
                 else
@@ -427,12 +427,12 @@ namespace Bmx
                     if (_inBlock)
                     {
                         
-                        _blockContain.append(_row + "\n");
+                        _blockContain.append(_currentLine + "\n");
                     }
                 }
             }
-            
-            _rowNum++;
+
+            _lineNum++;
         }
 
         if (_inBlock)
