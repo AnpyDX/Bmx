@@ -194,7 +194,7 @@ namespace Bmx
 
                 _lastI = i + 1;
 
-                // READ ROW
+                // READ LINE
                 
                 // -- Read block head. 
                 // Note: "[[" will be record as "["
