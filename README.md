@@ -1,15 +1,18 @@
 # Bmx
 ## About
-**Block Mixture Language** is a lightweight data storage format. Its reserved word is only one pair of brackets. This provide you a simple way to write and read **Bmx** file.
+**Block Mixture Language** is a lightweight data storage format. It provide you a easy way to store data or codes! For example, you can put the *vertex shader* and *fragment shader* at one `bmx` file, so that you can easily manage your code.
 
-This library is a **Bmx** parser for C++, but you can do some work to bind with other programming languages.
+This library is a `Bmx` parser for C++, but you can do some work to bind with other programming languages.
 
 ## How to use
-**Bmx** file can be formed with three structures: *Comments*, *BlockHeads*, *BlockBodys*.
+You can read and parse `Bmx` by including only a singel header file.
+
+Here is a simple example.
+
 - sample.bmx
 ```ini
 """
-This is a comment   
+This is a commit   
 """
 
 [ Block1 ]
@@ -39,6 +42,10 @@ int main()
 }
 ```
 You can see more details in the [Document](https://github.com/AnpyDX/Bmx/blob/main/Document.md)
+
+
+## Document
+See [Document](https://github.com/AnpyDX/Bmx/blob/main/Document.md).
 
 ## License
 Licensed under the MIT license, see `LICENSE` for details.
