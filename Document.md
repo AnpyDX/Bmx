@@ -99,7 +99,7 @@ int main()
 }
 ```
 
-- Convert Bmx type to string for wirting to files
+- Write data to files
 ```c++
 #include <iostream>
 #include <fstream>
@@ -122,8 +122,40 @@ int main()
 
 
 ## C++ API
-All functionalities from Bmx library are wrapped into `Bmx` namespace.
+All functions / types from Bmx library are wrapped into `Bmx` namespace.
+
+### Bmx::Exception
+- Prototype: `class Exception: public std::exception`
+- Usage: Throw when there is a problem reading `BMX` data.
 
 ### Bmx::Type
-- Type: class
-- Usage: wrapper of `BMX` data
+- Prototype: `class Type`
+- Usage: Wrapper of `BMX` data.
+
+### Bmx::Type::update
+- Prototype: `void Type::update(const std::string& key, const std::string& value)`
+- Usage: Add block / Change block's value.
+
+### Bmx::Type::remove
+- Prototype: `void Type::remove(const std::string& key)`
+- Usage: Remove block.
+
+### Bmx::Type::has_block
+- Prototype: `bool Type::has_block(const std::string& key) const`
+- Usgae: Check is block exisited.
+
+### Bmx::Type::get_keys
+- Prototype: `std::vector<std::string> Type::get_keys() const`
+- Usgae: Get all blocks' keys.
+
+### Bmx::load
+- Prototype: `Type load(const std::string& str)`
+- Usage: Load `Bmx` data from string.
+
+### Bmx::loads
+- Prototype: `Type loads(const std::fstream& file)`
+- Usage: Load `Bmx` data from file.
+
+### Bmx::dumps
+- Prototype: `std::string dumps(Type& data)`
+- Usage: Generate string from `Bmx` data for writing to files.
