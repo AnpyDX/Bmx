@@ -122,7 +122,7 @@ int main()
 
 
 ## C++ API
-All functions / types from Bmx library are wrapped into `Bmx` namespace.
+**All functions / types from Bmx library are wrapped into `Bmx` namespace.**
 
 ### Bmx::Exception
 - Prototype: `class Exception: public std::exception`
