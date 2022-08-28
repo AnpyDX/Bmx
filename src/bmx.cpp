@@ -14,14 +14,14 @@
 * Block Mixture Language for Modern C++
 * - File: Source File
 * - Project: https://github.com/AnpyDX/Bmx
-* - Version: 1.0 (for C++)
+* - Version: 1.1 (for C++)
 *
 * @copyright Copyright (c) 2022 AnpyD
 * Distributed under MIT license, or public domain if desired and recognized in your jurisdiction.
 */
 
 
-#include "include/bmx.h"
+#include "BMX/bmx.h"
 #include <iostream>
 #include <map>
 
@@ -83,8 +83,8 @@ namespace Bmx
     {
         if (!has_block(key))
         {
-            // Error, key is not exisited
-            throw Bmx::Exception("Block \"" + key + "\" is not exisited!");
+            // Error, key is not existed
+            throw Bmx::Exception("Block \"" + key + "\" is not existed!");
         }
 
         return _values[std::find(_keys.begin(), _keys.end(), key) - _keys.begin()];
@@ -114,8 +114,8 @@ namespace Bmx
         }
         else
         {
-            // Error, key is not exisited
-            throw Bmx::Exception("Block \"" + key + "\" is not exisited!");
+            // Error, key is not existed
+            throw Bmx::Exception("Block \"" + key + "\" is not existed!");
         }
     }
 
@@ -238,11 +238,11 @@ namespace Bmx
                     {
                         _blockName = _currentLine.substr(_nameBegin - _currentLine.begin(), _nameEnd - _currentLine.begin() - (_nameBegin - _currentLine.begin()) + 1);
 
-                        // Check block name has exisited
+                        // Check block name has existed
                         if (_data.has_block(_blockName))
                         {
                             throw Bmx::Exception("At (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_nameBegin - _currentLine.begin() + 1) + ")\n" +
-                                ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_nameBegin - _currentLine.begin()) + 1) + "\n>> Block name \"" + _blockName + "\" has exisited!");
+                                ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_nameBegin - _currentLine.begin()) + 1) + "\n>> Block name \"" + _blockName + "\" has existed!");
                         }
 
                         _inBlock = true;
@@ -372,11 +372,11 @@ namespace Bmx
                 {
                     _blockName = _currentLine.substr(_nameBegin - _currentLine.begin(), _nameEnd - _currentLine.begin() - (_nameBegin - _currentLine.begin()) + 1);
 
-                    // Check block name has exisited
+                    // Check block name has existed
                     if (_data.has_block(_blockName))
                     {
                         throw Bmx::Exception("At file (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_nameBegin - _currentLine.begin() + 1) + ")\n" +
-                            ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_nameBegin - _currentLine.begin()) + 1) + "\n>> Block name \"" + _blockName + "\" has exisited!");
+                            ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_nameBegin - _currentLine.begin()) + 1) + "\n>> Block name \"" + _blockName + "\" has existed!");
                     }
 
                     _inBlock = true;

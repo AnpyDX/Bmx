@@ -67,7 +67,7 @@ SA
 ```c++
 #include <iostream>
 #include <fstream>
-#include "bmx.h"
+#include "BMX/bmx.h"
 using namespace std;
 
 int main()
@@ -85,7 +85,7 @@ int main()
 - Load from string
 ```c++
 #include <iostream>
-#include "bmx.h"
+#include "BMX/bmx.h"
 using namespace std;
 
 int main()
@@ -103,7 +103,7 @@ int main()
 ```c++
 #include <iostream>
 #include <fstream>
-#include "bmx.h"
+#include "BMX/bmx.h"
 using namespace std;
 
 int main()

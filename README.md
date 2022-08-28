@@ -29,7 +29,7 @@ printf("Hello World!");
 - main.cpp
 ```c++
 #include <iostream>
-#include "bmx.hpp"
+#include "BMX/bmx.hpp"
 using namespace std;
 
 int main()
