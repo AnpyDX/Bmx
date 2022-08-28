@@ -12,7 +12,7 @@ Here is a simple example.
 - sample.bmx
 ```ini
 """
-This is a commit   
+This is a comment   
 """
 
 [ Block1 ]
