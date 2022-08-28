@@ -5,7 +5,7 @@
 This library is a `Bmx` parser for C++, but you can do some work to bind with other programming languages.
 
 ## How to use
-You can read and parse `Bmx` by including only a singel header file.
+You can read and parse `Bmx` data by including only a singel header file.
 
 Here is a simple example.
 
