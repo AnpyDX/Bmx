@@ -67,7 +67,7 @@ SA
 ```c++
 #include <iostream>
 #include <fstream>
-#include "bmx.hpp"
+#include "bmx.h"
 using namespace std;
 
 int main()
@@ -85,7 +85,7 @@ int main()
 - Load from string
 ```c++
 #include <iostream>
-#include "bmx.hpp"
+#include "bmx.h"
 using namespace std;
 
 int main()
@@ -103,7 +103,7 @@ int main()
 ```c++
 #include <iostream>
 #include <fstream>
-#include "bmx.hpp"
+#include "bmx.h"
 using namespace std;
 
 int main()
@@ -120,6 +120,20 @@ int main()
 }
 ```
 
+## Use Library
+### CMake
+- CMakeLists.txt
+```cmake
+cmake_minimum_required(VERSION 3.20)
+project(MyProject)
+
+add_executable(MyProject main.cpp src/bmx.cpp)
+
+target_include_directories(
+    MyProject PUBLIC
+    include/
+)
+```
 
 ## C++ API
 **All functions / types from Bmx library are wrapped into `Bmx` namespace.**

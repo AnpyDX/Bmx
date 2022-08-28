@@ -1,31 +1,30 @@
-﻿/** 
-*                    ___           ___     
-*     _____         /__/\         /__/|    
-*    /  /::\       |  |::\       |  |:|    
-*   /  /:/\:\      |  |:|:\      |  |:|    
-*  /  /:/~/::\   __|__|:|\:\   __|__|:|    
+﻿/**
+*                    ___           ___
+*     _____         /__/\         /__/|
+*    /  /::\       |  |::\       |  |:|
+*   /  /:/\:\      |  |:|:\      |  |:|
+*  /  /:/~/::\   __|__|:|\:\   __|__|:|
 * /__/:/ /:/\:| /__/::::| \:\ /__/::::\____
 * \  \:\/:/~/:/ \  \:\~~\__\/    ~\~~\::::/
-*  \  \::/ /:/   \  \:\           |~~|:|~~ 
-*   \  \:\/:/     \  \:\          |  |:|   
-*    \  \::/       \  \:\         |  |:|   
-*     \__\/         \__\/         |__|/    
-* 
+*  \  \::/ /:/   \  \:\           |~~|:|~~
+*   \  \:\/:/     \  \:\          |  |:|
+*    \  \::/       \  \:\         |  |:|
+*     \__\/         \__\/         |__|/
+*
 * Block Mixture Language for Modern C++
+* - File: Source File
 * - Project: https://github.com/AnpyDX/Bmx
 * - Version: 1.0 (for C++)
-* 
+*
 * @copyright Copyright (c) 2022 AnpyD
 * Distributed under MIT license, or public domain if desired and recognized in your jurisdiction.
 */
 
-#pragma once
+
+#include "include/bmx.h"
 #include <iostream>
-#include <stdexcept>
-#include <fstream>
-#include <string>
-#include <vector>
 #include <map>
+
 
 
 /* Internal Members */
@@ -50,7 +49,7 @@ namespace
 
         codeLine = "|" + std::to_string(rowCount) + " |" + row + "\n";
 
-        for (uint32_t i = 0; i < (3 + (int)(rowCount)/10) + lineCount; i++)
+        for (uint32_t i = 0; i < (3 + (int)(rowCount) / 10) + lineCount; i++)
         {
             underLine.append(" ");
         }
@@ -66,98 +65,70 @@ namespace
 namespace Bmx
 {
     // BMX Exception Type
-    class Exception : public std::exception
+    Exception::Exception(const std::string& info)
     {
-    public:
-        Exception(const std::string& info)
-        {
-            this->mExceptionInfo = info;
-        }
+        this->mExceptionInfo = info;
+    }
 
-        virtual ~Exception() {}
+    Exception::~Exception() {}
 
-        virtual const char* what() const
-        {
-            return this->mExceptionInfo.c_str();
-        }
+    const char* Exception::what() const
+    {
+        return this->mExceptionInfo.c_str();
+    }
 
-    private:
-        std::string mExceptionInfo;
-    };
 
     /// Bmx Type
-    class Type
+    std::string& Type::operator[](const std::string& key)
     {
-        friend std::string dumps(Type& type);
+        if (!has_block(key))
+        {
+            // Error, key is not exisited
+            throw Bmx::Exception("Block \"" + key + "\" is not exisited!");
+        }
 
-        public:
-            std::string& operator[](const std::string& key)
-            {
-                if (!has_block(key))
-                {
-                    // Error, key is not exisited
-                    throw Bmx::Exception("Block \"" + key + "\" is not exisited!");
-                }
+        return _values[std::find(_keys.begin(), _keys.end(), key) - _keys.begin()];
+    }
 
-                return _values[std::find(_keys.begin(), _keys.end(), key) - _keys.begin()];
-            }
+    void Type::update(const std::string& key, const std::string& value)
+    {
+        if (!has_block(key))
+        {
+            _keys.push_back(key);
+            _values.push_back(value);
+        }
+        else
+        {
+            __int64 index = std::find(_keys.begin(), _keys.end(), key) - _keys.begin();
+            _values[index] = value;
+        }
+    }
 
-            /**
-            * Usage: add/change block
-            */
-            void update(const std::string& key, const std::string& value)
-            {
-                if (!has_block(key))
-                {
-                    _keys.push_back(key);
-                    _values.push_back(value);
-                }
-                else
-                {
-                    __int64 index = std::find(_keys.begin(), _keys.end(), key) - _keys.begin();
-                    _values[index] = value;
-                }
-            }
+    void Type::remove(const std::string& key)
+    {
+        if (has_block(key))
+        {
+            __int64 index = std::find(_keys.begin(), _keys.end(), key) - _keys.begin();
+            _keys.erase(_keys.begin() + index);
+            _values.erase(_values.begin() + index);
+        }
+        else
+        {
+            // Error, key is not exisited
+            throw Bmx::Exception("Block \"" + key + "\" is not exisited!");
+        }
+    }
 
-            /**
-            * Usage: remove block
-            */
-            void remove(const std::string& key)
-            {
-                if (has_block(key))
-                {
-                    __int64 index = std::find(_keys.begin(), _keys.end(), key) - _keys.begin();
-                    _keys.erase(_keys.begin() + index);
-                    _values.erase(_values.begin() + index);
-                }
-                else
-                {
-                    // Error, key is not exisited
-                    throw Bmx::Exception("Block \"" + key + "\" is not exisited!");
-                }
-            }
+    bool Type::has_block(const std::string& key) const
+    {
+        return (std::find(_keys.begin(), _keys.end(), key) != _keys.end());
+    }
 
-            /**
-            * Usage: check block is exisited
-            */
-            bool has_block(const std::string& key) const
-            {
-                return (std::find(_keys.begin(), _keys.end(), key) != _keys.end());
-            }
+    std::vector<std::string> Type::get_keys() const
+    {
+        return _keys;
+    }
 
-            /**
-            * Usage: get all blocks' key
-            */
-            std::vector<std::string> get_keys() const
-            {
-                return _keys;
-            }
-
-            
-        private:
-            std::vector<std::string> _keys;
-            std::vector<std::string> _values;
-    };
 
     /// Load Bmx string
     Bmx::Type load(const std::string& str)
@@ -174,7 +145,7 @@ namespace Bmx
         for (auto i = str.begin(); i != str.end(); i++)
         {
             if (*i == '\n' || i == str.end() - 1)
-            {   
+            {
                 // GET LINE
                 _currentLine = "";
                 if (i == str.end() - 1)
@@ -195,7 +166,7 @@ namespace Bmx
                 _lastI = i + 1;
 
                 // READ LINE
-                
+
                 // -- Read block head. 
                 // Note: "[[" will be record as "["
                 if (std::string(1, _currentLine[0]) == KeyWords[LEFT_BRACKET_KEY] &&
@@ -327,7 +298,7 @@ namespace Bmx
         bool _inBlock = false;
         std::string _blockName = "";
         std::string _blockContain = "";
-        
+
         while (std::getline(file, _currentLine))
         {
             // -- Read block head. 
@@ -392,7 +363,7 @@ namespace Bmx
                 }
                 // Error, the block head is empty
                 else if (_nameEnd == _currentLine.rend().base())
-                { 
+                {
                     throw Bmx::Exception("At file (" + std::to_string(_lineNum + 1) + ", " + std::to_string(_currentLine.length()) + ")\n" +
                         ErrorPoint(_currentLine, _lineNum + 1, static_cast<uint32_t>(_currentLine.length())) + "\n>> Block head is empty!");
                 }
@@ -426,7 +397,7 @@ namespace Bmx
                 {
                     if (_inBlock)
                     {
-                        
+
                         _blockContain.append(_currentLine + "\n");
                     }
                 }
@@ -466,5 +437,4 @@ namespace Bmx
 
         return _str;
     }
-    
 }

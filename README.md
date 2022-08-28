@@ -5,14 +5,14 @@
 This library is a `Bmx` parser for C++, but you can do some work to bind with other programming languages.
 
 ## How to use
-You can read and parse `Bmx` data by including only a header file.
+Using library from this repository to parse `Bmx` data to C++ types.
 
 Here is a simple example.
 
 - sample.bmx
 ```ini
 """
-This is a comment   
+This is a commit   
 """
 
 [ Block1 ]
